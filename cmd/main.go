@@ -2,55 +2,32 @@ package main
 
 import (
 	"fmt"
-	"github.com/gocolly/colly"
+	"github.com/n-kazachuk/go_parser/internal/services"
+	"time"
 )
 
-type Order struct {
-	timeFrom string
-	timeTo   string
-	cost     int
-	isFree   bool
-}
-
-func NewOrder(timeFrom, timeTo string, isFree bool) *Order {
-	return &Order{
-		timeFrom: timeFrom,
-		timeTo:   timeTo,
-		isFree:   isFree,
-	}
-}
-
 func main() {
-	c := colly.NewCollector(
-		colly.AllowedDomains("atlasbus.by"),
-	)
+	defer scriptRunningTime("main")()
 
-	var orders []*Order
+	fromCity := "Минск"
+	toCity := "Петриков"
+	date := "2023-11-24"
 
-	c.OnHTML(".MuiContainer-root .MuiGrid-root.MuiGrid-item.MuiGrid-grid-md-8.MuiGrid-grid-lg-9", func(e *colly.HTMLElement) {
-		e.ForEach("div.MuiGrid-root.MuiGrid-container:nth-child(1)", func(i int, el *colly.HTMLElement) {
-			if el.DOM.HasClass("MuiGrid-align-items-xs-center") {
-				return
-			}
-
-			timeFromEl := el.DOM.Find("div.MuiGrid-grid-md-3:nth-child(1) > div:first-child > div:first-child > div:first-child")
-			timeToEl := el.DOM.Find("div.MuiGrid-grid-md-3:nth-child(2) > div:first-child > div:first-child > div:first-child")
-			isFreeEl := el.DOM.Find("button.MuiButton-containedPrimary")
-
-			orders = append(orders, NewOrder(
-				timeFromEl.Text(),
-				timeToEl.Text(),
-				!isFreeEl.HasClass("Mui-disabled"),
-			))
-		})
-	})
-
-	err := c.Visit("https://atlasbus.by/Маршруты/Минск/Житковичи?date=2023-11-17")
+	service := services.NewService()
+	orders, err := service.ParseOrders(fromCity, toCity, date)
 	if err != nil {
-		fmt.Println("Error while visiting page: " + err.Error())
+		fmt.Println(err.Error())
+		return
 	}
 
 	for _, value := range orders {
 		fmt.Println(value)
+	}
+}
+
+func scriptRunningTime(name string) func() {
+	start := time.Now()
+	return func() {
+		fmt.Printf("%s took %v\n", name, time.Since(start))
 	}
 }
