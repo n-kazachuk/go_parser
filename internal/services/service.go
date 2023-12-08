@@ -1,30 +1,15 @@
 package services
 
 import (
-	"github.com/n-kazachuk/go_parser/internal/models"
-	"github.com/n-kazachuk/go_parser/internal/parsers"
+	"github.com/n-kazachuk/go_parser/internal/services/parser"
 )
 
-type Parser interface {
-	GetOrders(fromCity, toCity, date string) ([]*models.Order, error)
-}
-
 type Service struct {
-	Parser
+	Parser *parser.ParseService
 }
 
 func NewService() *Service {
 	return &Service{
-		Parser: parsers.NewAtlasParser(),
+		Parser: parser.NewParseService(),
 	}
-}
-
-func (s *Service) ParseOrders(fromCity, toCity, date string) ([]*models.Order, error) {
-	orders, err := s.Parser.GetOrders(fromCity, toCity, date)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return orders, nil
 }

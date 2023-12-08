@@ -1,4 +1,4 @@
-package parsers
+package parser
 
 import (
 	"errors"
@@ -18,7 +18,7 @@ func NewAtlasParser() *AtlasParser {
 	return &AtlasParser{}
 }
 
-func (p *AtlasParser) GetOrders(fromCity, toCity, date string) ([]*models.Order, error) {
+func (p *AtlasParser) ParseOrders(fromCity, toCity, date string) ([]*models.Order, error) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(DOMAIN),
 	)

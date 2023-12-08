@@ -9,12 +9,13 @@ import (
 func main() {
 	defer scriptRunningTime("main")()
 
-	fromCity := "Минск"
-	toCity := "Петриков"
-	date := "2023-11-24"
-
 	service := services.NewService()
-	orders, err := service.ParseOrders(fromCity, toCity, date)
+
+	fromCity := "Минск"
+	toCity := "Житковичи"
+	date := "2023-12-01"
+
+	orders, err := service.Parser.GetOrders(fromCity, toCity, date)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
