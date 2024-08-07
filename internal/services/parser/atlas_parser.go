@@ -4,21 +4,21 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gocolly/colly"
-	"github.com/n-kazachuk/go_parser/internal/models"
+	"github.com/n-kazachuk/go_parser/internal/domain/models"
 )
 
 const (
 	DOMAIN = "atlasbus.by"
 )
 
-type AtlasParser struct {
+type AtlasStorage struct {
 }
 
-func NewAtlasParser() *AtlasParser {
-	return &AtlasParser{}
+func NewAtlasStorage() *AtlasStorage {
+	return &AtlasStorage{}
 }
 
-func (p *AtlasParser) ParseOrders(fromCity, toCity, date string) ([]*models.Order, error) {
+func (s *AtlasStorage) ParseOrders(fromCity, toCity, date string) ([]*models.Order, error) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(DOMAIN),
 	)
@@ -33,7 +33,7 @@ func (p *AtlasParser) ParseOrders(fromCity, toCity, date string) ([]*models.Orde
 
 			timeFromEl := el.DOM.Find("div.MuiGrid-grid-md-3:nth-child(1) > div:first-child > div:first-child > div:first-child")
 			timeToEl := el.DOM.Find("div.MuiGrid-grid-md-3:nth-child(2) > div:first-child > div:first-child > div:first-child")
-			isFreeEl := el.DOM.Find("button.MuiButton-containedPrimary")
+			isFreeEl := el.DOM.Find("button.MuiButton-contained")
 
 			orders = append(orders, models.NewOrder(
 				timeFromEl.Text(),
