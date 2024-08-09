@@ -5,7 +5,7 @@ import (
 )
 
 type Storage interface {
-	ParseOrders(fromCity, toCity, date string) ([]*models.Order, error)
+	GetOrders(fromCity, toCity, date string) ([]*models.Order, error)
 }
 
 type Parser struct {
@@ -19,7 +19,7 @@ func NewParser(storage Storage) *Parser {
 }
 
 func (s *Parser) GetOrders(fromCity, toCity, date string) ([]*models.Order, error) {
-	orders, err := s.Storage.ParseOrders(fromCity, toCity, date)
+	orders, err := s.Storage.GetOrders(fromCity, toCity, date)
 
 	if err != nil {
 		return nil, err

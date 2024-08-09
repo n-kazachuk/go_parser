@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/n-kazachuk/go_parser/internal/services/parser"
+	"github.com/n-kazachuk/go_parser/internal/storage/atlas_parser"
 	"log/slog"
 
 	parserapp "github.com/n-kazachuk/go_parser/internal/app/parser"
@@ -16,7 +17,7 @@ func New(
 	log *slog.Logger,
 	cfg *config.Config,
 ) *App {
-	parserStorage := parser.NewAtlasStorage()
+	parserStorage := atlas_parser.NewAtlasStorage()
 	parserService := parser.NewParser(parserStorage)
 	parserApp := parserapp.New(log, cfg, parserService)
 
