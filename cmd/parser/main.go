@@ -22,9 +22,8 @@ func main() {
 
 	application := app.New(log, cfg)
 
-	go func() {
-		application.Parser.MustRun()
-	}()
+	go func() { application.Parser.MustRun() }()
+	go func() { application.Kafka.MustRun() }()
 
 	// Graceful shutdown
 	stop := make(chan os.Signal, 1)
@@ -33,6 +32,7 @@ func main() {
 	<-stop
 
 	application.Parser.Stop()
+	application.Kafka.Stop()
 	log.Info("Gracefully stopped")
 }
 

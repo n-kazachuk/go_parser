@@ -1,4 +1,10 @@
 env: "local" # Type of environment (prod, local)
+pgsql:
+  host: ""
+  port: ""
+  user: ""
+  password: ""
+  dbname: ""
 parser:
   interval: 1s  # HTTP-requests interval
   timeout: 5s # HTTP-request timeout for resource parsing

@@ -1,4 +1,4 @@
-package parserapp
+package parserApp
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ func (a *App) MustRun() {
 
 func (a *App) Run() error {
 	const op = "parser.Run"
-
+	return nil
 	ticker := time.NewTicker(a.cfg.Parser.Interval)
 	defer ticker.Stop()
 

@@ -3,7 +3,7 @@ package models
 type Order struct {
 	timeFrom string
 	timeTo   string
-	cost     int
+	cost     float32
 	isFree   bool
 }
 

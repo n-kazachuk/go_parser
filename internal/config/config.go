@@ -10,7 +10,21 @@ import (
 
 type Config struct {
 	Env    string       `yaml:"env" env-default:"local"`
-	Parser ParserConfig `yaml:"parser" env-default:"5s"`
+	Pgsql  PgsqlConfig  `yaml:"pgsql"`
+	Kafka  KafkaConfig  `yaml:"kafka"`
+	Parser ParserConfig `yaml:"parser"`
+}
+
+type PgsqlConfig struct {
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	DbName   string `yaml:"dbname"`
+}
+
+type KafkaConfig struct {
+	Brokers []string `yaml:"brokers"`
 }
 
 type ParserConfig struct {
