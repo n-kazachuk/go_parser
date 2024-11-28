@@ -24,7 +24,8 @@ type PgsqlConfig struct {
 }
 
 type KafkaConfig struct {
-	Brokers []string `yaml:"brokers"`
+	Interval int      `yaml:"interval"`
+	Brokers  []string `yaml:"brokers"`
 }
 
 type ParserConfig struct {

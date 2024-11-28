@@ -3,12 +3,13 @@ package app
 import (
 	kafkaApp "github.com/n-kazachuk/go_parser/internal/app/kafka"
 	parserApp "github.com/n-kazachuk/go_parser/internal/app/parser"
-	"github.com/n-kazachuk/go_parser/internal/storage/pgsql"
 
 	"github.com/n-kazachuk/go_parser/internal/config"
+	"github.com/n-kazachuk/go_parser/internal/handler/kafka"
 	"github.com/n-kazachuk/go_parser/internal/services/parser"
 	"github.com/n-kazachuk/go_parser/internal/services/ticket_request"
 	"github.com/n-kazachuk/go_parser/internal/storage/atlas_parser"
+	"github.com/n-kazachuk/go_parser/internal/storage/pgsql"
 	"log/slog"
 )
 
@@ -31,7 +32,8 @@ func New(
 	parserApplication := parserApp.New(log, cfg, parserService)
 
 	ticketRequestService := ticket_request.New(ticketsStorage)
-	kafkaApplication := kafkaApp.New(log, cfg, ticketRequestService)
+	kafkaHandler := kafka.New(log, ticketRequestService)
+	kafkaApplication := kafkaApp.New(log, cfg, kafkaHandler)
 
 	return &App{
 		Kafka:  kafkaApplication,

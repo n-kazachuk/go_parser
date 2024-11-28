@@ -34,7 +34,7 @@ func (a *App) MustRun() {
 
 func (a *App) Run() error {
 	const op = "parser.Run"
-	return nil
+
 	ticker := time.NewTicker(a.cfg.Parser.Interval)
 	defer ticker.Stop()
 
@@ -65,4 +65,6 @@ func (a *App) Run() error {
 func (a *App) Stop() {
 	const op = "parser.Stop"
 	close(a.stopCh)
+
+	a.log.Info(fmt.Sprintf("Parser stopped %s", op))
 }

@@ -30,9 +30,9 @@ func New(cfg *config.Config) (*Storage, error) {
 
 // AddTicketRequestToQueue add new ticketRequest to queue
 func (s *Storage) AddTicketRequestToQueue(ticketRequest *models.TicketRequest) error {
-	const op = "storage.pgsql.AddTicketRequestToQueue"
+	const op = "pgsql.AddTicketRequestToQueue"
 
-	stmt, err := s.db.Prepare("INSERT INTO search_ticket_queue(from_city, to_city, date, from_time, to_time) VALUES(?, ?, ?, ?, ?)")
+	stmt, err := s.db.Prepare("INSERT INTO search_ticket_queue(from_city, to_city, date, from_time, to_time) VALUES($1, $2, $3, $4, $5)")
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
@@ -41,11 +41,6 @@ func (s *Storage) AddTicketRequestToQueue(ticketRequest *models.TicketRequest) e
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
-
-	//id, err := res.LastInsertId()
-	//if err != nil {
-	//	return fmt.Errorf("%s: %w", op, err)
-	//}
 
 	return nil
 }

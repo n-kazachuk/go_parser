@@ -1,7 +1,6 @@
 package models
 
 type TicketRequest struct {
-	Step     int
 	FromCity string
 	ToCity   string
 	Date     string

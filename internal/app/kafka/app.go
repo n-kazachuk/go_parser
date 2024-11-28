@@ -1,31 +1,42 @@
 package kafka
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/IBM/sarama"
 	"github.com/n-kazachuk/go_parser/internal/config"
-	"github.com/n-kazachuk/go_parser/internal/domain/models"
 	"github.com/n-kazachuk/go_parser/internal/lib/logger/sl"
-	"github.com/n-kazachuk/go_parser/internal/services/ticket_request"
 	"log/slog"
+	"strings"
+
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
-const TicketFindRequestTopic = "ticket_find_request"
+const (
+	ParserGroup            = "parser"
+	TicketFindRequestTopic = "ticket_find_request"
+)
+
+type Handler interface {
+	HandleTicketFindRequest(event kafka.Event) error
+}
 
 type App struct {
 	log     *slog.Logger
 	cfg     *config.Config
-	service *ticket_request.TicketRequest
+	handler Handler
 
-	consumer sarama.Consumer
+	consumer *kafka.Consumer
+	stopCh   chan struct{}
 }
 
-func New(log *slog.Logger, cfg *config.Config, service *ticket_request.TicketRequest) *App {
-	consumerCfg := sarama.NewConfig()
-	consumerCfg.Consumer.Return.Errors = true
+func New(log *slog.Logger, cfg *config.Config, handler Handler) *App {
+	consumerConfig := &kafka.ConfigMap{
+		"bootstrap.servers":        strings.Join(cfg.Kafka.Brokers, ","),
+		"group.id":                 ParserGroup,
+		"enable.auto.offset.store": true,
+		"enable.auto.commit":       true,
+	}
 
-	consumer, err := sarama.NewConsumer(cfg.Kafka.Brokers, consumerCfg)
+	consumer, err := kafka.NewConsumer(consumerConfig)
 	if err != nil {
 		log.Error("Failed to create consumer: %v", sl.Err(err))
 	}
@@ -33,8 +44,9 @@ func New(log *slog.Logger, cfg *config.Config, service *ticket_request.TicketReq
 	return &App{
 		log,
 		cfg,
-		service,
+		handler,
 		consumer,
+		make(chan struct{}),
 	}
 }
 
@@ -46,7 +58,7 @@ func (a *App) MustRun() {
 }
 
 func (a *App) Run() error {
-	const op = "Kakfa.Run"
+	const op = "Kafka.Run"
 
 	a.log.Info(fmt.Sprintf("Running %s", op))
 
@@ -56,41 +68,42 @@ func (a *App) Run() error {
 }
 
 func (a *App) Stop() {
-	const op = "parser.Stop"
-	a.log.Info(fmt.Sprintf("Kafka stopped %s", op))
+	const op = "kafka.Stop"
 
-	_ = a.consumer.Close()
+	close(a.stopCh)
+
+	if err := a.consumer.Close(); err != nil {
+		a.log.Error("Failed to close consumer: %v", sl.Err(err))
+	}
+
+	a.log.Info(fmt.Sprintf("Kafka stopped %s", op))
 }
 
 func (a *App) listenTicketsRequest() {
 	const op = "Kafka.listenTicketsRequest"
 
-	partitionCosumer, err := a.consumer.ConsumePartition(TicketFindRequestTopic, 0, sarama.OffsetNewest)
-
+	err := a.consumer.Subscribe(TicketFindRequestTopic, nil)
 	if err != nil {
-		a.log.Error("Failed to create consumer: %v", op, sl.Err(err))
+		a.log.Error("Failed to subscribe topic: %v", sl.Err(err))
 	}
 
-	a.log.Info(fmt.Sprintf("Consumer started %s", op))
+	a.log.Info(fmt.Sprintf("Consumer started: %s", op))
 
 	for {
 		select {
-		case err := <-partitionCosumer.Errors():
-			a.log.Error("Error from partition error chanel: %v", op, sl.Err(err))
-		case msg := <-partitionCosumer.Messages():
-			var ticketRequest *models.TicketRequest
-
-			err := json.Unmarshal(msg.Value, ticketRequest)
-			if err != nil {
-				a.log.Error("Error from partition error chanel: %v", op, sl.Err(err))
+		case <-a.stopCh:
+			a.log.Info(fmt.Sprintf("Exiting listenTicketsRequest %s", op))
+			return
+		default:
+			event := a.consumer.Poll(a.cfg.Kafka.Interval)
+			if event == nil {
+				continue
 			}
 
-			err = a.service.PushToQueue(ticketRequest)
+			err := a.handler.HandleTicketFindRequest(event)
 			if err != nil {
-				a.log.Error("Error from partition error chanel: %v", op, sl.Err(err))
+				a.log.Error("Error with reading message: %v", sl.Err(err))
 			}
-
-			a.log.Info(fmt.Sprintf("Message from partition %s", msg.Value))
 		}
 	}
 }
