@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gocolly/colly"
+	"github.com/n-kazachuk/go_parser/internal/config"
 	"github.com/n-kazachuk/go_parser/internal/domain/models"
+	"log/slog"
 )
 
 const (
@@ -12,16 +14,20 @@ const (
 )
 
 type AtlasStorage struct {
+	log *slog.Logger
+	cfg *config.Config
 }
 
-func NewAtlasStorage() *AtlasStorage {
-	return &AtlasStorage{}
+func NewAtlasStorage(log *slog.Logger, cfg *config.Config) *AtlasStorage {
+	return &AtlasStorage{log, cfg}
 }
 
 func (s *AtlasStorage) GetOrders(fromCity, toCity, date string) ([]*models.Order, error) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(DOMAIN),
 	)
+
+	c.SetRequestTimeout(s.cfg.Parser.Timeout)
 
 	var orders []*models.Order
 

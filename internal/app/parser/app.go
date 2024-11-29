@@ -1,31 +1,45 @@
 package parserApp
 
 import (
+	parserService "github.com/n-kazachuk/go_parser/internal/services/parser"
+	parserWorker "github.com/n-kazachuk/go_parser/internal/workers/parser"
+	"sync"
+
 	"fmt"
 	"github.com/n-kazachuk/go_parser/internal/config"
-	"github.com/n-kazachuk/go_parser/internal/services/parser"
+	"github.com/n-kazachuk/go_parser/internal/services/ticket_request"
 	"log/slog"
-	"time"
 )
 
 type App struct {
-	log     *slog.Logger
-	cfg     *config.Config
-	service *parser.Parser
+	log                  *slog.Logger
+	cfg                  *config.Config
+	parserService        *parserService.Parse
+	ticketRequestService *ticket_request.TicketRequest
 
-	stopCh chan struct{}
+	workersWg *sync.WaitGroup
+	workers   []*parserWorker.Worker
 }
 
-func New(log *slog.Logger, cfg *config.Config, service *parser.Parser) *App {
+func New(
+	log *slog.Logger,
+	cfg *config.Config,
+	parserService *parserService.Parse,
+	ticketRequestService *ticket_request.TicketRequest,
+) *App {
+	workersWg := &sync.WaitGroup{}
+	workers := make([]*parserWorker.Worker, cfg.Parser.Worker.Count)
+
 	return &App{
 		log,
 		cfg,
-		service,
-		make(chan struct{}),
+		parserService,
+		ticketRequestService,
+		workersWg,
+		workers,
 	}
 }
 
-// MustRun runs parser and panics if any error occurs.
 func (a *App) MustRun() {
 	if err := a.Run(); err != nil {
 		panic(err)
@@ -35,36 +49,38 @@ func (a *App) MustRun() {
 func (a *App) Run() error {
 	const op = "parser.Run"
 
-	ticker := time.NewTicker(a.cfg.Parser.Interval)
-	defer ticker.Stop()
-
-	fromCity := "Минск"
-	toCity := "Житковичи"
-	date := "2024-08-10"
-
-	for {
-		select {
-		case <-ticker.C:
-			orders, err := a.service.GetOrders(fromCity, toCity, date)
-			if err != nil {
-				fmt.Println(err.Error())
-				return err
-			}
-
-			for _, value := range orders {
-				fmt.Println(value)
-			}
-
-		case <-a.stopCh:
-			fmt.Println("Stopping parser...")
-			return nil
-		}
+	workersCount := a.cfg.Parser.Worker.Count
+	if workersCount <= 0 {
+		return fmt.Errorf("%s: workers count can't be empty", op)
 	}
+
+	for i := 0; i < workersCount; i++ {
+		worker := parserWorker.New(
+			i,
+			a.log,
+			a.cfg,
+			a.workersWg,
+			a.parserService,
+			a.ticketRequestService,
+		)
+
+		a.workers[i] = worker
+
+		go worker.Start()
+	}
+
+	return nil
 }
 
 func (a *App) Stop() {
 	const op = "parser.Stop"
-	close(a.stopCh)
 
-	a.log.Info(fmt.Sprintf("Parser stopped %s", op))
+	for index, worker := range a.workers {
+		worker.Stop()
+		a.log.Info(fmt.Sprintf("%s: parser worker %v stopped", op, index))
+	}
+
+	a.workersWg.Wait()
+
+	a.log.Info(fmt.Sprintf("%s: parser stopped", op))
 }

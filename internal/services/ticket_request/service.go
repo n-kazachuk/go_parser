@@ -6,6 +6,7 @@ import (
 
 type QueueStorage interface {
 	AddTicketRequestToQueue(ticketRequest *models.TicketRequest) error
+	GetFreeTicketRequestFromQueue() (*models.TicketRequest, error)
 }
 
 type TicketRequest struct {
@@ -25,4 +26,14 @@ func (s *TicketRequest) PushToQueue(ticketRequest *models.TicketRequest) error {
 	}
 
 	return nil
+}
+
+func (s *TicketRequest) GetFreeFromQueue() (*models.TicketRequest, error) {
+	ticketRequest, err := s.QueueStorage.GetFreeTicketRequestFromQueue()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return ticketRequest, nil
 }

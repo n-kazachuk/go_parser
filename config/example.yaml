@@ -1,10 +1,21 @@
 env: "local" # Type of environment (prod, local)
+
 pgsql:
   host: ""
   port: ""
   user: ""
   password: ""
   dbname: ""
+
+kafka:
+  interval: 100
+  brokers:
+    - "localhost:9091"
+    - "localhost:9092"
+    - "localhost:9093"
+
 parser:
-  interval: 1s  # HTTP-requests interval
-  timeout: 5s # HTTP-request timeout for resource parsing
+  timeout: 5s
+  worker:
+    count: 5
+    interval: 1s

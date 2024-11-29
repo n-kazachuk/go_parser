@@ -29,8 +29,13 @@ type KafkaConfig struct {
 }
 
 type ParserConfig struct {
+	Timeout time.Duration      `yaml:"timeout"`
+	Worker  ParserWorkerConfig `yaml:"worker"`
+}
+
+type ParserWorkerConfig struct {
+	Count    int           `yaml:"count"`
 	Interval time.Duration `yaml:"interval"`
-	Timeout  time.Duration `yaml:"timeout"`
 }
 
 func MustLoad() *Config {

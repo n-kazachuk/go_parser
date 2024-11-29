@@ -22,18 +22,19 @@ func New(
 	log *slog.Logger,
 	cfg *config.Config,
 ) *App {
-	ticketsStorage, err := pgsql.New(cfg)
+	storage, err := pgsql.New(cfg)
 	if err != nil {
 		panic(err)
 	}
 
-	parserStorage := atlas_parser.NewAtlasStorage()
-	parserService := parser.NewParser(parserStorage)
-	parserApplication := parserApp.New(log, cfg, parserService)
+	ticketRequestService := ticket_request.New(storage)
 
-	ticketRequestService := ticket_request.New(ticketsStorage)
 	kafkaHandler := kafka.New(log, ticketRequestService)
 	kafkaApplication := kafkaApp.New(log, cfg, kafkaHandler)
+
+	parserStorage := atlas_parser.NewAtlasStorage(log, cfg)
+	parserService := parser.New(parserStorage, storage)
+	parserApplication := parserApp.New(log, cfg, parserService, ticketRequestService)
 
 	return &App{
 		Kafka:  kafkaApplication,
