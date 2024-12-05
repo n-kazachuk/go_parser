@@ -1,6 +1,8 @@
 package kafka
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/n-kazachuk/go_parser/internal/domain/models"
 	"github.com/n-kazachuk/go_parser/internal/lib/logger/sl"
@@ -25,12 +27,16 @@ func (h *Handler) HandleTicketFindRequest(event kafka.Event) error {
 
 	switch e := event.(type) {
 	case *kafka.Message:
+		h.log.Info(fmt.Sprintf("%s: %v", op, e.Value))
+
 		ticketFindRequest := models.NewTicketRequest()
-		ticketFindRequest.FromCity = "Москва"
-		ticketFindRequest.ToCity = "Минск"
-		ticketFindRequest.Date = "2024-11-28"
-		ticketFindRequest.FromTime = "13:00"
-		ticketFindRequest.ToTime = "18:00"
+
+		err := json.Unmarshal(e.Value, ticketFindRequest)
+		if err != nil {
+			return err
+		}
+
+		h.log.Info(fmt.Sprintf("%s: %v", op, ticketFindRequest))
 
 		return h.service.PushToQueue(ticketFindRequest)
 	case kafka.Error:

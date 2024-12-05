@@ -17,6 +17,7 @@ type Worker struct {
 	log                  *slog.Logger
 	cfg                  *config.Config
 	wg                   *sync.WaitGroup
+	mu                   *sync.Mutex
 	parserService        *parserService.Parse
 	ticketRequestService *ticket_request.TicketRequest
 
@@ -28,6 +29,7 @@ func New(
 	log *slog.Logger,
 	cfg *config.Config,
 	wg *sync.WaitGroup,
+	mu *sync.Mutex,
 	parserService *parserService.Parse,
 	ticketRequestService *ticket_request.TicketRequest,
 ) *Worker {
@@ -36,6 +38,7 @@ func New(
 		log,
 		cfg,
 		wg,
+		mu,
 		parserService,
 		ticketRequestService,
 		make(chan struct{}),
@@ -83,7 +86,11 @@ func (w *Worker) Stop() {
 }
 
 func (w *Worker) fetchTask() (*models.TicketRequest, error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
 	ticketRequest, err := w.ticketRequestService.GetFreeFromQueue()
+
 	if err != nil {
 		return nil, err
 	}
@@ -91,17 +98,22 @@ func (w *Worker) fetchTask() (*models.TicketRequest, error) {
 	return ticketRequest, nil
 }
 
-func (w *Worker) processTask(ticket *models.TicketRequest) error {
+func (w *Worker) processTask(ticketRequest *models.TicketRequest) error {
 	const op = "worker.processTask"
 
 	w.log.Info(fmt.Sprintf("%s: worker #%v processing task", op, w.id))
 
-	orders, err := w.parserService.GetOrders(ticket.FromCity, ticket.ToCity, ticket.Date)
+	tickets, err := w.parserService.GetTickets(ticketRequest.FromCity, ticketRequest.ToCity, ticketRequest.Date.Format("2006-01-02"))
 	if err != nil {
 		return err
 	}
 
-	err = w.parserService.SaveOrders(orders)
+	err = w.parserService.SaveTickets(tickets)
+	if err != nil {
+		return err
+	}
+
+	err = w.ticketRequestService.SetProcessed(ticketRequest)
 	if err != nil {
 		return err
 	}

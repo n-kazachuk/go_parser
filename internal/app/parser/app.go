@@ -18,6 +18,7 @@ type App struct {
 	ticketRequestService *ticket_request.TicketRequest
 
 	workersWg *sync.WaitGroup
+	workersMu *sync.Mutex
 	workers   []*parserWorker.Worker
 }
 
@@ -28,6 +29,7 @@ func New(
 	ticketRequestService *ticket_request.TicketRequest,
 ) *App {
 	workersWg := &sync.WaitGroup{}
+	workersMu := &sync.Mutex{}
 	workers := make([]*parserWorker.Worker, cfg.Parser.Worker.Count)
 
 	return &App{
@@ -36,6 +38,7 @@ func New(
 		parserService,
 		ticketRequestService,
 		workersWg,
+		workersMu,
 		workers,
 	}
 }
@@ -60,6 +63,7 @@ func (a *App) Run() error {
 			a.log,
 			a.cfg,
 			a.workersWg,
+			a.workersMu,
 			a.parserService,
 			a.ticketRequestService,
 		)

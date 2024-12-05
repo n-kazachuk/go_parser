@@ -6,11 +6,11 @@ import (
 )
 
 type OrdersGetterStorage interface {
-	GetOrders(fromCity, toCity, date string) ([]*models.Order, error)
+	GetTickets(fromCity, toCity, date string) ([]*models.Ticket, error)
 }
 
 type OrdersSaverStorage interface {
-	SaveOrders(orders []*models.Order) error
+	SaveTickets(orders []*models.Ticket) error
 }
 
 type Parse struct {
@@ -28,10 +28,10 @@ func New(
 	}
 }
 
-func (s *Parse) GetOrders(fromCity, toCity, date string) ([]*models.Order, error) {
+func (s *Parse) GetTickets(fromCity, toCity, date string) ([]*models.Ticket, error) {
 	const op = "Parse.GetOrders"
 
-	orders, err := s.OrdersGetterStorage.GetOrders(fromCity, toCity, date)
+	orders, err := s.OrdersGetterStorage.GetTickets(fromCity, toCity, date)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", op, "Error while getting orders from storage")
 	}
@@ -39,10 +39,14 @@ func (s *Parse) GetOrders(fromCity, toCity, date string) ([]*models.Order, error
 	return orders, nil
 }
 
-func (s *Parse) SaveOrders(orders []*models.Order) error {
+func (s *Parse) SaveTickets(tickets []*models.Ticket) error {
 	const op = "Parse.GetOrders"
 
-	err := s.OrdersSaverStorage.SaveOrders(orders)
+	if len(tickets) == 0 {
+		return nil
+	}
+
+	err := s.OrdersSaverStorage.SaveTickets(tickets)
 	if err != nil {
 		return fmt.Errorf("%s: %s", op, "Error while saving orders from storage")
 	}
