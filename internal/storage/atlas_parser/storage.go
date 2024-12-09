@@ -33,6 +33,13 @@ func (s *AtlasStorage) GetTickets(fromCity, toCity, date string) ([]*models.Tick
 
 	c.SetRequestTimeout(s.cfg.Parser.Timeout)
 
+	proxy := s.cfg.Parser.Proxy
+	if proxy != "" {
+		if err := c.SetProxy(proxy); err != nil {
+			return nil, errors.New("Error while set proxy: " + err.Error())
+		}
+	}
+
 	var tickets []*models.Ticket
 
 	c.OnHTML(".MuiContainer-root .MuiGrid-root.MuiGrid-item.MuiGrid-grid-md-8.MuiGrid-grid-lg-9", func(e *colly.HTMLElement) {

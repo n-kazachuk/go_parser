@@ -15,6 +15,7 @@ kafka:
     - "localhost:9093"
 
 parser:
+  proxy: ""
   timeout: 5s
   interval: 10s
   worker:

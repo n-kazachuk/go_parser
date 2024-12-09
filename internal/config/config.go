@@ -29,6 +29,7 @@ type KafkaConfig struct {
 }
 
 type ParserConfig struct {
+	Proxy    string             `yaml:"proxy"`
 	Timeout  time.Duration      `yaml:"timeout"`
 	Interval time.Duration      `yaml:"interval"`
 	Worker   ParserWorkerConfig `yaml:"worker"`
