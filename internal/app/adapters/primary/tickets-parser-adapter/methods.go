@@ -1,10 +1,10 @@
 package tickets_parser_adapter
 
 import (
-	worker "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/tickets-parser-adapter/tickets-parser-worker"
-
 	"context"
 	"fmt"
+	worker "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/tickets-parser-adapter/tickets-parser-worker"
+	"github.com/n-kazachuk/go_parser/internal/libs/helpers"
 )
 
 func (a *TicketsParserAdapter) Start(ctx context.Context) error {
@@ -16,6 +16,8 @@ func (a *TicketsParserAdapter) Start(ctx context.Context) error {
 	}
 
 	for i := 0; i < workersCount; i++ {
+		a.workersWg.Add(1)
+
 		wrk := worker.New(
 			i,
 			a.log,
@@ -30,7 +32,11 @@ func (a *TicketsParserAdapter) Start(ctx context.Context) error {
 		go wrk.Start(ctx)
 	}
 
+	a.log.Info(fmt.Sprintf("%s: stop before workers wait", op))
+
 	a.workersWg.Wait()
 
-	return nil
+	a.log.Info(fmt.Sprintf("%s: after workers wait", op))
+
+	return fmt.Errorf("%s: parser adapter sropped", helpers.GetFunctionName())
 }

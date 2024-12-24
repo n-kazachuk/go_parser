@@ -13,7 +13,6 @@ func (w *Worker) Start(ctx context.Context) {
 
 	w.log.Info(fmt.Sprintf("%s: worker #%v started", op, w.id))
 
-	w.wg.Add(1)
 	defer w.wg.Done()
 
 	ticker := time.NewTicker(w.cfg.Worker.Interval)

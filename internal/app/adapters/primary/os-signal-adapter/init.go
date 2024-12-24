@@ -28,10 +28,11 @@ func (a *OsSignalAdapter) Start(ctx context.Context) error {
 		a.Stop()
 		return ctx.Err()
 	case sig := <-ch:
+		a.Stop()
 		return fmt.Errorf("%s: system signal getted %s", helpers.GetFunctionName(), sig.String())
 	}
 }
 
 func (a *OsSignalAdapter) Stop() {
-	a.log.Info(fmt.Sprintf("OsSignalAdapter gracefully stopped"))
+	a.log.Info(fmt.Sprintf("OS signal Adapter stopped"))
 }
