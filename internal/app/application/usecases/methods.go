@@ -2,10 +2,11 @@ package usecases
 
 import (
 	"fmt"
-	"github.com/n-kazachuk/go_parser/internal/app/domain/model"
+	"github.com/n-kazachuk/go_parser/internal/app/domain/ticket"
+	"github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
 )
 
-func (s *UseCases) PushToQueue(ticketRequest *model.TicketRequest) error {
+func (s *UseCases) PushToQueue(ticketRequest *tickets_request.TicketRequest) error {
 	const op = "TicketRequest.PushToQueue"
 
 	err := s.queueStorage.AddTicketRequestToQueue(ticketRequest)
@@ -16,7 +17,7 @@ func (s *UseCases) PushToQueue(ticketRequest *model.TicketRequest) error {
 	return nil
 }
 
-func (s *UseCases) GetFreeFromQueue() (*model.TicketRequest, error) {
+func (s *UseCases) GetFreeFromQueue() (*tickets_request.TicketRequest, error) {
 	const op = "TicketRequest.GetFreeFromQueue"
 
 	ticketRequest, err := s.queueStorage.GetFreeTicketRequestFromQueue(s.cfg.Parser.Interval)
@@ -36,18 +37,18 @@ func (s *UseCases) GetFreeFromQueue() (*model.TicketRequest, error) {
 	return ticketRequest, nil
 }
 
-func (s *UseCases) GetTicketsFromSource(fromCity, toCity, date string) ([]*model.Ticket, error) {
+func (s *UseCases) GetTicketsFromSource(ticketRequest *tickets_request.TicketRequest) ([]*ticket.Ticket, error) {
 	const op = "Parse.GetOrders"
 
-	orders, err := s.ticketsGateway.GetTickets(fromCity, toCity, date)
+	tickets, err := s.ticketsGateway.GetTickets(ticketRequest)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", op, "Error while getting orders from storage")
 	}
 
-	return orders, nil
+	return tickets, nil
 }
 
-func (s *UseCases) SaveTickets(tickets []*model.Ticket) error {
+func (s *UseCases) SaveTickets(tickets []*ticket.Ticket) error {
 	const op = "Parse.GetOrders"
 
 	if len(tickets) == 0 {
@@ -62,7 +63,7 @@ func (s *UseCases) SaveTickets(tickets []*model.Ticket) error {
 	return nil
 }
 
-func (s *UseCases) SetProcessed(ticketRequest *model.TicketRequest) error {
+func (s *UseCases) SetProcessed(ticketRequest *tickets_request.TicketRequest) error {
 	const op = "TicketRequest.SetProcessed"
 
 	err := s.queueStorage.SetTicketRequestProcessed(ticketRequest)

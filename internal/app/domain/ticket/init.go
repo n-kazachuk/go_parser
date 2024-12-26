@@ -1,4 +1,4 @@
-package model
+package ticket
 
 import "time"
 
@@ -12,6 +12,6 @@ type Ticket struct {
 	IsFree   bool
 }
 
-func NewTicket() *Ticket {
+func New() *Ticket {
 	return &Ticket{}
 }

@@ -2,7 +2,8 @@ package usecases
 
 import (
 	"github.com/n-kazachuk/go_parser/internal/app/config"
-	"github.com/n-kazachuk/go_parser/internal/app/domain/model"
+	"github.com/n-kazachuk/go_parser/internal/app/domain/ticket"
+	"github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
 	"log/slog"
 	"time"
 )
@@ -16,18 +17,18 @@ type UseCases struct {
 }
 
 type queueStorage interface {
-	AddTicketRequestToQueue(ticketRequest *model.TicketRequest) error
-	GetFreeTicketRequestFromQueue(expiredInterval time.Duration) (*model.TicketRequest, error)
-	SetTicketRequestPicked(ticketRequest *model.TicketRequest) error
-	SetTicketRequestProcessed(ticketRequest *model.TicketRequest) error
+	AddTicketRequestToQueue(ticketRequest *tickets_request.TicketRequest) error
+	GetFreeTicketRequestFromQueue(expiredInterval time.Duration) (*tickets_request.TicketRequest, error)
+	SetTicketRequestPicked(ticketRequest *tickets_request.TicketRequest) error
+	SetTicketRequestProcessed(ticketRequest *tickets_request.TicketRequest) error
 }
 
 type ticketsStorage interface {
-	SaveTickets(orders []*model.Ticket) error
+	SaveTickets(orders []*ticket.Ticket) error
 }
 
 type ticketsGateway interface {
-	GetTickets(fromCity, toCity, date string) ([]*model.Ticket, error)
+	GetTickets(ticketRequest *tickets_request.TicketRequest) ([]*ticket.Ticket, error)
 }
 
 func New(

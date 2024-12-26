@@ -1,11 +1,12 @@
 package kafka_handler
 
 import (
+	ticketsRequest "github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
+
 	"encoding/json"
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/n-kazachuk/go_parser/internal/app/domain/model"
-	"github.com/n-kazachuk/go_parser/internal/libs/sl"
+	"github.com/n-kazachuk/go_parser/internal/libs/logger/sl"
 )
 
 func (h *KafkaHandler) HandleTicketFindRequest(event kafka.Event) error {
@@ -15,7 +16,7 @@ func (h *KafkaHandler) HandleTicketFindRequest(event kafka.Event) error {
 	case *kafka.Message:
 		h.log.Info(fmt.Sprintf("%s: %v", op, e.Value))
 
-		ticketFindRequest := model.NewTicketRequest()
+		ticketFindRequest := ticketsRequest.New()
 
 		err := json.Unmarshal(e.Value, ticketFindRequest)
 		if err != nil {

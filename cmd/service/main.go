@@ -5,7 +5,7 @@ import (
 	"github.com/n-kazachuk/go_parser/internal/app"
 	"github.com/n-kazachuk/go_parser/internal/app/config"
 	"github.com/n-kazachuk/go_parser/internal/libs/graceful"
-	"github.com/n-kazachuk/go_parser/internal/libs/slogpretty"
+	"github.com/n-kazachuk/go_parser/internal/libs/logger/slogpretty"
 )
 
 func main() {

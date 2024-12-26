@@ -3,8 +3,8 @@ package tickets_parser_worker
 import (
 	"context"
 	"fmt"
-	"github.com/n-kazachuk/go_parser/internal/app/domain/model"
-	"github.com/n-kazachuk/go_parser/internal/libs/sl"
+	"github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
+	"github.com/n-kazachuk/go_parser/internal/libs/logger/sl"
 	"time"
 )
 
@@ -48,7 +48,7 @@ func (w *Worker) Stop() {
 	w.log.Info(fmt.Sprintf("%s: Worker #%v stopped", op, w.id))
 }
 
-func (w *Worker) fetchTask() (*model.TicketRequest, error) {
+func (w *Worker) fetchTask() (*tickets_request.TicketRequest, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
@@ -61,12 +61,12 @@ func (w *Worker) fetchTask() (*model.TicketRequest, error) {
 	return ticketRequest, nil
 }
 
-func (w *Worker) processTask(ticketRequest *model.TicketRequest) error {
+func (w *Worker) processTask(ticketRequest *tickets_request.TicketRequest) error {
 	const op = "worker.processTask"
 
 	w.log.Info(fmt.Sprintf("%s: worker #%v processing task", op, w.id))
 
-	tickets, err := w.service.GetTicketsFromSource(ticketRequest.FromCity, ticketRequest.ToCity, ticketRequest.Date.Format("2006-01-02"))
+	tickets, err := w.service.GetTicketsFromSource(ticketRequest)
 	if err != nil {
 		return err
 	}

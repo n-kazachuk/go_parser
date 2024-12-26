@@ -1,17 +1,19 @@
 package tickets_atlas_gateway
 
 import (
+	ticketsRequest "github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
+
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
-	"github.com/n-kazachuk/go_parser/internal/app/domain/model"
+	"github.com/n-kazachuk/go_parser/internal/app/domain/ticket"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func (s *TicketsAtlasGateway) GetTickets(fromCity, toCity, date string) ([]*model.Ticket, error) {
+func (s *TicketsAtlasGateway) GetTickets(ticketRequest *ticketsRequest.TicketRequest) ([]*ticket.Ticket, error) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(DOMAIN),
 	)
@@ -25,7 +27,7 @@ func (s *TicketsAtlasGateway) GetTickets(fromCity, toCity, date string) ([]*mode
 		}
 	}
 
-	var tickets []*model.Ticket
+	var tickets []*ticket.Ticket
 
 	c.OnHTML(".MuiContainer-root .MuiGrid-root.MuiGrid-item.MuiGrid-grid-md-8.MuiGrid-grid-lg-9", func(e *colly.HTMLElement) {
 		e.ForEach("div.MuiGrid-root.MuiGrid-container:nth-child(1)", func(i int, el *colly.HTMLElement) {
@@ -39,16 +41,20 @@ func (s *TicketsAtlasGateway) GetTickets(fromCity, toCity, date string) ([]*mode
 			isFreeEl := el.DOM.Find("button.MuiButton-contained")
 			priceEl := el.DOM.Find("h6")
 
-			ticket, err := s.getTicketFromParsedData(timeFromEl, timeToEl, isFreeEl, priceEl, fromCity, toCity, date)
+			ticket, err := s.getTicketFromParsedData(timeFromEl, timeToEl, isFreeEl, priceEl)
 			if err != nil {
 				return
 			}
+
+			ticket.FromCity = ticketRequest.FromCity
+			ticket.ToCity = ticketRequest.ToCity
+			ticket.Date = ticketRequest.Date
 
 			tickets = append(tickets, ticket)
 		})
 	})
 
-	err := c.Visit(fmt.Sprintf("https://%s/Маршруты/%s/%s?date=%s", DOMAIN, fromCity, toCity, date))
+	err := c.Visit(fmt.Sprintf("https://%s/Маршруты/%s/%s?date=%s", DOMAIN, ticketRequest.FromCity, ticketRequest.ToCity, ticketRequest.Date.Format("2006-01-02")))
 	if err != nil {
 		return nil, errors.New("Error while visiting page: " + err.Error())
 	}
@@ -57,23 +63,16 @@ func (s *TicketsAtlasGateway) GetTickets(fromCity, toCity, date string) ([]*mode
 }
 
 func (s *TicketsAtlasGateway) getTicketFromParsedData(
-	timeFromEl, timeToEl, isFreeEl, priceEl *goquery.Selection,
-	fromCity, toCity, date string,
-) (*model.Ticket, error) {
-	ticket := model.NewTicket()
-
-	ticket.FromCity = fromCity
-	ticket.ToCity = toCity
+	timeFromEl,
+	timeToEl,
+	isFreeEl,
+	priceEl *goquery.Selection,
+) (*ticket.Ticket, error) {
+	ticket := ticket.New()
 
 	var err error
 
-	dateFormat := "2006-01-02"
 	timeFormat := "15:04"
-
-	ticket.Date, err = time.Parse(dateFormat, date)
-	if err != nil {
-		return nil, err
-	}
 
 	ticket.FromTime, err = time.Parse(timeFormat, timeFromEl.Text())
 	if err != nil {

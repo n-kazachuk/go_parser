@@ -5,12 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lib/pq"
-	"github.com/n-kazachuk/go_parser/internal/app/domain/model"
+	"github.com/n-kazachuk/go_parser/internal/app/domain/ticket"
+	"github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
 	"strings"
 	"time"
 )
 
-func (s *TicketsRepositoryPostgres) SaveTickets(tickets []*model.Ticket) error {
+func (s *TicketsRepositoryPostgres) SaveTickets(tickets []*ticket.Ticket) error {
 	const op = "pgsql.SaveTickets"
 
 	query := `
@@ -46,7 +47,7 @@ func (s *TicketsRepositoryPostgres) SaveTickets(tickets []*model.Ticket) error {
 }
 
 // AddTicketRequestToQueue add new ticketRequest to queue
-func (s *TicketsRepositoryPostgres) AddTicketRequestToQueue(ticketRequest *model.TicketRequest) error {
+func (s *TicketsRepositoryPostgres) AddTicketRequestToQueue(ticketRequest *tickets_request.TicketRequest) error {
 	const op = "pgsql.AddTicketRequestToQueue"
 
 	stmt, err := s.db.Prepare(`
@@ -74,7 +75,7 @@ func (s *TicketsRepositoryPostgres) AddTicketRequestToQueue(ticketRequest *model
 }
 
 // GetFreeTicketRequestFromQueue retrieves the oldest free ticket request from the queue
-func (s *TicketsRepositoryPostgres) GetFreeTicketRequestFromQueue(expiredInterval time.Duration) (*model.TicketRequest, error) {
+func (s *TicketsRepositoryPostgres) GetFreeTicketRequestFromQueue(expiredInterval time.Duration) (*tickets_request.TicketRequest, error) {
 	const op = "pgsql.GetFreeTicketRequestFromQueue"
 
 	timeout := time.Now().Add(-expiredInterval)
@@ -92,7 +93,7 @@ func (s *TicketsRepositoryPostgres) GetFreeTicketRequestFromQueue(expiredInterva
 	defer stmt.Close()
 
 	row := stmt.QueryRow(timeout)
-	ticketRequest := model.NewTicketRequest()
+	ticketRequest := tickets_request.New()
 
 	err = row.Scan(
 		&ticketRequest.FromCity,
@@ -113,7 +114,7 @@ func (s *TicketsRepositoryPostgres) GetFreeTicketRequestFromQueue(expiredInterva
 }
 
 // SetTicketRequestPicked add new ticketRequest to queue
-func (s *TicketsRepositoryPostgres) SetTicketRequestPicked(ticketRequest *model.TicketRequest) error {
+func (s *TicketsRepositoryPostgres) SetTicketRequestPicked(ticketRequest *tickets_request.TicketRequest) error {
 	const op = "pgsql.SetTicketRequestPicked"
 
 	stmt, err := s.db.Prepare("UPDATE search_ticket_queue SET is_picked = TRUE WHERE from_city = $1 AND to_city = $2 AND date = $3")
@@ -131,7 +132,7 @@ func (s *TicketsRepositoryPostgres) SetTicketRequestPicked(ticketRequest *model.
 }
 
 // SetTicketRequestProcessed updates ticket request in the queue
-func (s *TicketsRepositoryPostgres) SetTicketRequestProcessed(ticketRequest *model.TicketRequest) error {
+func (s *TicketsRepositoryPostgres) SetTicketRequestProcessed(ticketRequest *tickets_request.TicketRequest) error {
 	const op = "pgsql.SetTicketRequestProcessed"
 
 	stmt, err := s.db.Prepare(`
