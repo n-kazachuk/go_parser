@@ -42,7 +42,7 @@ func (gr *Graceful) Start(ctx context.Context) {
 
 	_ = g.Wait()
 
-	gr.logger.Info("Application stopped Gracefully")
+	gr.logger.Info("Application gracefully stopped")
 }
 
 func (gr *Graceful) SetLogger(l *slog.Logger) {

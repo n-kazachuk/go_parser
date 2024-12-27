@@ -34,5 +34,5 @@ func (a *OsSignalAdapter) Start(ctx context.Context) error {
 }
 
 func (a *OsSignalAdapter) Stop() {
-	a.log.Info(fmt.Sprintf("OS signal Adapter stopped"))
+	a.log.Info(fmt.Sprintf("OsSignalAdapter gracefully stopped"))
 }

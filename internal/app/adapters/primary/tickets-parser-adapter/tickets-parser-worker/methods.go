@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 	"github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
+	"github.com/n-kazachuk/go_parser/internal/libs/helpers"
 	"github.com/n-kazachuk/go_parser/internal/libs/logger/sl"
 	"time"
 )
 
 func (w *Worker) Start(ctx context.Context) {
-	const op = "worker.Start"
+	op := helpers.GetFunctionName()
 
-	w.log.Info(fmt.Sprintf("%s: worker #%v started", op, w.id))
+	w.log.Info("Worker started")
 
 	defer w.wg.Done()
 
@@ -23,7 +24,7 @@ func (w *Worker) Start(ctx context.Context) {
 		case <-ticker.C:
 			task, err := w.fetchTask()
 			if err != nil {
-				w.log.Error("%s: worker #%v error fetching task: %v\n", op, w.id, sl.Err(err))
+				w.log.Error(fmt.Sprintf("%s: error fetching worker task \n", op), sl.Err(err))
 				continue
 			}
 
@@ -33,7 +34,7 @@ func (w *Worker) Start(ctx context.Context) {
 
 			err = w.processTask(task)
 			if err != nil {
-				w.log.Error("%s: worker #%v error processing task: %v\n", op, w.id, sl.Err(err))
+				w.log.Error(fmt.Sprintf("%s: error processing worker task \n", op), sl.Err(err))
 				continue
 			}
 		case <-ctx.Done():
@@ -44,8 +45,7 @@ func (w *Worker) Start(ctx context.Context) {
 }
 
 func (w *Worker) Stop() {
-	const op = "parser.Stop"
-	w.log.Info(fmt.Sprintf("%s: Worker #%v stopped", op, w.id))
+	w.log.Info(fmt.Sprintf("Worker stopped"))
 }
 
 func (w *Worker) fetchTask() (*tickets_request.TicketRequest, error) {
@@ -62,9 +62,7 @@ func (w *Worker) fetchTask() (*tickets_request.TicketRequest, error) {
 }
 
 func (w *Worker) processTask(ticketRequest *tickets_request.TicketRequest) error {
-	const op = "worker.processTask"
-
-	w.log.Info(fmt.Sprintf("%s: worker #%v processing task", op, w.id))
+	w.log.Info(fmt.Sprintf("Worker start processing task"))
 
 	tickets, err := w.service.GetTicketsFromSource(ticketRequest)
 	if err != nil {
@@ -81,7 +79,7 @@ func (w *Worker) processTask(ticketRequest *tickets_request.TicketRequest) error
 		return err
 	}
 
-	w.log.Info(fmt.Sprintf("%s: worker #%v procesed his task", op, w.id))
+	w.log.Info(fmt.Sprintf("Worker procesed his task"))
 
 	return nil
 }

@@ -7,16 +7,12 @@ import (
 )
 
 func (a *KafkaAdapterSubscriber) Start(ctx context.Context) error {
-	const op = "Kafka.Run"
-
-	a.log.Info(fmt.Sprintf("Running %s", op))
-
 	err := a.consumer.Subscribe(TicketFindRequestTopic, nil)
 	if err != nil {
 		return err
 	}
 
-	a.log.Info(fmt.Sprintf("Consumer started: %s", op))
+	a.log.Info("KafkaAdapterSubscriber started")
 
 	for {
 		select {
@@ -31,7 +27,7 @@ func (a *KafkaAdapterSubscriber) Start(ctx context.Context) error {
 
 			err := a.handler.HandleTicketFindRequest(event)
 			if err != nil {
-				a.log.Error("Error with reading message: %v", sl.Err(err))
+				a.log.Error("Error with reading message", sl.Err(err))
 			}
 		}
 	}
@@ -39,7 +35,7 @@ func (a *KafkaAdapterSubscriber) Start(ctx context.Context) error {
 
 func (a *KafkaAdapterSubscriber) Stop() {
 	if err := a.consumer.Close(); err != nil {
-		a.log.Error("Failed to close consumer: %v", sl.Err(err))
+		a.log.Error("Failed to close consumer conn in KafkaAdapterSubscriber", sl.Err(err))
 	}
 
 	a.log.Info(fmt.Sprintf("KafkaAdapterSubscriber gracefully stopped"))

@@ -32,7 +32,6 @@ func (s *TicketsAtlasGateway) GetTickets(ticketRequest *ticketsRequest.TicketReq
 	c.OnHTML(".MuiContainer-root .MuiGrid-root.MuiGrid-item.MuiGrid-grid-md-8.MuiGrid-grid-lg-9", func(e *colly.HTMLElement) {
 		e.ForEach("div.MuiGrid-root.MuiGrid-container:nth-child(1)", func(i int, el *colly.HTMLElement) {
 			if el.DOM.HasClass("MuiGrid-align-items-xs-center") {
-				fmt.Println("Return ?")
 				return
 			}
 

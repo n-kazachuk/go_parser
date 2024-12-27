@@ -18,12 +18,14 @@ type Worker struct {
 
 func New(
 	id int,
-	log *slog.Logger,
+	logger *slog.Logger,
 	cfg *config.ParserConfig,
 	wg *sync.WaitGroup,
 	mu *sync.Mutex,
 	service *usecases.UseCases,
 ) *Worker {
+	log := logger.With(slog.Int("workerId", id))
+
 	return &Worker{
 		id,
 		log,

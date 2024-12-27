@@ -8,7 +8,7 @@ import (
 )
 
 func (a *TicketsParserAdapter) Start(ctx context.Context) error {
-	const op = "parser.Run"
+	op := helpers.GetFunctionName()
 
 	workersCount := a.cfg.Worker.Count
 	if workersCount <= 0 {
@@ -32,11 +32,9 @@ func (a *TicketsParserAdapter) Start(ctx context.Context) error {
 		go wrk.Start(ctx)
 	}
 
-	a.log.Info(fmt.Sprintf("%s: stop before workers wait", op))
-
 	a.workersWg.Wait()
 
-	a.log.Info(fmt.Sprintf("%s: after workers wait", op))
+	a.log.Info("TicketsParserAdapter gracefully stopped")
 
-	return fmt.Errorf("%s: parser adapter sropped", helpers.GetFunctionName())
+	return nil
 }
