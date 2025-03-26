@@ -3,17 +3,19 @@ package tickets_atlas_gateway
 import (
 	ticketsRequest "github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
 
-	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/n-kazachuk/go_parser/internal/app/domain/ticket"
+	"github.com/n-kazachuk/go_parser/internal/libs/helpers"
 	"strconv"
 	"strings"
 	"time"
 )
 
 func (s *TicketsAtlasGateway) GetTickets(ticketRequest *ticketsRequest.TicketRequest) ([]*ticket.Ticket, error) {
+	op := helpers.GetFunctionName()
+
 	c := colly.NewCollector(
 		colly.AllowedDomains(DOMAIN),
 	)
@@ -23,7 +25,7 @@ func (s *TicketsAtlasGateway) GetTickets(ticketRequest *ticketsRequest.TicketReq
 	proxy := s.cfg.Proxy
 	if proxy != "" {
 		if err := c.SetProxy(proxy); err != nil {
-			return nil, errors.New("Error while set proxy: " + err.Error())
+			return nil, fmt.Errorf("%s: error while set proxy: %s", op, err.Error())
 		}
 	}
 
@@ -55,7 +57,7 @@ func (s *TicketsAtlasGateway) GetTickets(ticketRequest *ticketsRequest.TicketReq
 
 	err := c.Visit(fmt.Sprintf("https://%s/Маршруты/%s/%s?date=%s", DOMAIN, ticketRequest.FromCity, ticketRequest.ToCity, ticketRequest.Date.Format("2006-01-02")))
 	if err != nil {
-		return nil, errors.New("Error while visiting page: " + err.Error())
+		return nil, fmt.Errorf("%s: error while visiting page: %s", op, err.Error())
 	}
 
 	return tickets, nil

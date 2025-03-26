@@ -1,15 +1,17 @@
 package app
 
 import (
-	kafkaAdapterSubscriber "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/kafka-adapter-subscriber"
-	osSignalAdapter "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/os-signal-adapter"
-	ticketsParserAdapter "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/tickets-parser-adapter"
-	ticketsAtlasGateway "github.com/n-kazachuk/go_parser/internal/app/adapters/secondary/gateways/tickets-atlas-gateway"
-	ticketsRepositoryPostgres "github.com/n-kazachuk/go_parser/internal/app/adapters/secondary/repositories/tickets-repository-postgres"
+	"log/slog"
 
 	"github.com/n-kazachuk/go_parser/internal/app/application/usecases"
 	"github.com/n-kazachuk/go_parser/internal/app/config"
-	"log/slog"
+
+	kafkaAdapterSubscriber "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/kafka-adapter-subscriber"
+	osSignalAdapter "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/os-signal-adapter"
+	ticketsParserAdapter "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/tickets-parser-adapter"
+	ticketsDummyGateway "github.com/n-kazachuk/go_parser/internal/app/adapters/secondary/gateways/tickets-dummy-gateway"
+	ticketsRepositoryPostgres "github.com/n-kazachuk/go_parser/internal/app/adapters/secondary/repositories/tickets-repository-postgres"
+	ticketsRequestsRepositoryPostgres "github.com/n-kazachuk/go_parser/internal/app/adapters/secondary/repositories/tickets-requests-repository-postgres"
 )
 
 type App struct {
@@ -19,15 +21,18 @@ type App struct {
 }
 
 func New(log *slog.Logger, cfg *config.Config) *App {
+	//ticketsGateway := ticketsAtlasGateway.New(log, &cfg.Gateway)
+	ticketsGateway := ticketsDummyGateway.New(log, &cfg.Gateway)
+
 	ticketsRepository := ticketsRepositoryPostgres.New(&cfg.Pgsql)
-	ticketsGateway := ticketsAtlasGateway.New(log, &cfg.Gateway)
+	ticketsRequestsRepository := ticketsRequestsRepositoryPostgres.New(&cfg.Pgsql)
 
 	usc := usecases.New(
 		log,
 		cfg,
-		ticketsRepository,
-		ticketsRepository,
 		ticketsGateway,
+		ticketsRepository,
+		ticketsRequestsRepository,
 	)
 
 	osAdapter := osSignalAdapter.New(log)
@@ -35,8 +40,8 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 	parserAdapter := ticketsParserAdapter.New(log, &cfg.Parser, usc)
 
 	return &App{
-		osAdapter,
-		kafkaSubscriber,
-		parserAdapter,
+		OsSignalAdapter:        osAdapter,
+		KafkaSubscriberAdapter: kafkaSubscriber,
+		TicketsParserAdapter:   parserAdapter,
 	}
 }

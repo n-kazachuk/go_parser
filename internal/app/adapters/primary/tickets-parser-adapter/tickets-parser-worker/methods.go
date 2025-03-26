@@ -45,7 +45,7 @@ func (w *Worker) Start(ctx context.Context) {
 }
 
 func (w *Worker) Stop() {
-	w.log.Info(fmt.Sprintf("Worker stopped"))
+	w.log.Info("Worker stopped")
 }
 
 func (w *Worker) fetchTask() (*tickets_request.TicketRequest, error) {
@@ -62,14 +62,14 @@ func (w *Worker) fetchTask() (*tickets_request.TicketRequest, error) {
 }
 
 func (w *Worker) processTask(ticketRequest *tickets_request.TicketRequest) error {
-	w.log.Info(fmt.Sprintf("Worker start processing task"))
+	w.log.Info("Worker start processing task")
 
 	tickets, err := w.service.GetTicketsFromSource(ticketRequest)
 	if err != nil {
 		return err
 	}
 
-	err = w.service.SaveTickets(tickets)
+	err = w.service.SaveTicketsToStorage(tickets)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func (w *Worker) processTask(ticketRequest *tickets_request.TicketRequest) error
 		return err
 	}
 
-	w.log.Info(fmt.Sprintf("Worker procesed his task"))
+	w.log.Info("Worker processed his task")
 
 	return nil
 }

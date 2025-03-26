@@ -1,74 +1,95 @@
 package usecases
 
 import (
+	"errors"
 	"fmt"
 	"github.com/n-kazachuk/go_parser/internal/app/domain/ticket"
 	"github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
+	"github.com/n-kazachuk/go_parser/internal/libs/helpers"
+	"github.com/n-kazachuk/go_parser/internal/libs/logger/sl"
 )
 
 func (s *UseCases) PushToQueue(ticketRequest *tickets_request.TicketRequest) error {
-	const op = "TicketRequest.PushToQueue"
+	log := sl.WithTrace(s.log)
 
-	err := s.queueStorage.AddTicketRequestToQueue(ticketRequest)
+	err := s.ticketsRequestsStorage.Add(ticketRequest)
 	if err != nil {
-		return fmt.Errorf("%s: %s", op, "Error while adding new ticket request to queue")
+		errMsg := "failed adding new ticket request to queue"
+		log.Error(errMsg, sl.Err(err))
+
+		return errors.New(errMsg)
 	}
 
 	return nil
 }
 
 func (s *UseCases) GetFreeFromQueue() (*tickets_request.TicketRequest, error) {
-	const op = "TicketRequest.GetFreeFromQueue"
+	op := helpers.GetFunctionName()
 
-	ticketRequest, err := s.queueStorage.GetFreeTicketRequestFromQueue(s.cfg.Parser.Interval)
+	ticketRequest, err := s.ticketsRequestsStorage.GetFree(s.cfg.Parser.Interval)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %s", op, "Error while taking free ticket request")
+		errMsg := fmt.Sprintf("%s: error while taking free ticket request", op)
+		s.log.Error(errMsg, sl.Err(err))
+
+		return nil, errors.New(errMsg)
 	}
 
 	if ticketRequest == nil {
 		return nil, nil
 	}
 
-	err = s.queueStorage.SetTicketRequestPicked(ticketRequest)
+	err = s.ticketsRequestsStorage.SetPicked(ticketRequest)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %s", op, "Error while setting ticket request picked")
+		errMsg := fmt.Sprintf("%s: error while setting ticket request picked", op)
+		s.log.Error(errMsg, sl.Err(err))
+
+		return nil, errors.New(errMsg)
 	}
 
 	return ticketRequest, nil
 }
 
 func (s *UseCases) GetTicketsFromSource(ticketRequest *tickets_request.TicketRequest) ([]*ticket.Ticket, error) {
-	const op = "Parse.GetOrders"
+	op := helpers.GetFunctionName()
 
 	tickets, err := s.ticketsGateway.GetTickets(ticketRequest)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %s", op, "Error while getting orders from storage")
+		errMsg := fmt.Sprintf("%s: error while getting orders from storage", op)
+		s.log.Error(errMsg, sl.Err(err))
+
+		return nil, errors.New(errMsg)
 	}
 
 	return tickets, nil
 }
 
-func (s *UseCases) SaveTickets(tickets []*ticket.Ticket) error {
-	const op = "Parse.GetOrders"
+func (s *UseCases) SaveTicketsToStorage(tickets []*ticket.Ticket) error {
+	op := helpers.GetFunctionName()
 
 	if len(tickets) == 0 {
 		return nil
 	}
 
-	err := s.ticketsStorage.SaveTickets(tickets)
+	err := s.ticketsStorage.Save(tickets)
 	if err != nil {
-		return fmt.Errorf("%s: %s", op, "Error while saving orders from storage")
+		errMsg := fmt.Sprintf("%s: error while saving orders from storage", op)
+		s.log.Error(errMsg, sl.Err(err))
+
+		return errors.New(errMsg)
 	}
 
 	return nil
 }
 
 func (s *UseCases) SetProcessed(ticketRequest *tickets_request.TicketRequest) error {
-	const op = "TicketRequest.SetProcessed"
+	op := helpers.GetFunctionName()
 
-	err := s.queueStorage.SetTicketRequestProcessed(ticketRequest)
+	err := s.ticketsRequestsStorage.SetProcessed(ticketRequest)
 	if err != nil {
-		return fmt.Errorf("%s: %s", op, "Error while making ticket request processed")
+		errMsg := fmt.Sprintf("%s: error while making ticket request processed", op)
+		s.log.Error(errMsg, sl.Err(err))
+
+		return errors.New(errMsg)
 	}
 
 	return nil

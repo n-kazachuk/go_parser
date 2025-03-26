@@ -32,6 +32,7 @@ func New(log *slog.Logger, cfg *config.KafkaConfig, service *usecases.UseCases) 
 		"group.id":                 ParserGroup,
 		"enable.auto.offset.store": true,
 		"enable.auto.commit":       true,
+		"allow.auto.create.topics": true,
 	}
 
 	consumer, err := kafka.NewConsumer(consumerConfig)
