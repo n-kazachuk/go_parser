@@ -3,6 +3,7 @@ package kafka_adapter_subscriber
 import (
 	"context"
 	"fmt"
+
 	"github.com/n-kazachuk/go_parser/internal/libs/logger/sl"
 )
 

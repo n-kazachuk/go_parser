@@ -3,8 +3,10 @@ package tickets_parser_adapter
 import (
 	"context"
 	"fmt"
-	worker "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/tickets-parser-adapter/tickets-parser-worker"
+
 	"github.com/n-kazachuk/go_parser/internal/libs/helpers"
+
+	worker "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/tickets-parser-adapter/tickets-parser-worker"
 )
 
 func (a *TicketsParserAdapter) Start(ctx context.Context) error {

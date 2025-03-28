@@ -3,6 +3,7 @@ package tickets_requests_repository_postgres
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/n-kazachuk/go_parser/internal/app/config"
 )
 

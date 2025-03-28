@@ -1,12 +1,13 @@
 package tickets_parser_adapter
 
 import (
-	worker "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/tickets-parser-adapter/tickets-parser-worker"
+	"log/slog"
+	"sync"
 
 	"github.com/n-kazachuk/go_parser/internal/app/application/usecases"
 	"github.com/n-kazachuk/go_parser/internal/app/config"
-	"log/slog"
-	"sync"
+
+	worker "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/tickets-parser-adapter/tickets-parser-worker"
 )
 
 type TicketsParserAdapter struct {

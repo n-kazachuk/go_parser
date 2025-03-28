@@ -2,8 +2,9 @@ package tickets_repository_postgres
 
 import (
 	"fmt"
-	"github.com/n-kazachuk/go_parser/internal/app/domain/ticket"
 	"strings"
+
+	"github.com/n-kazachuk/go_parser/internal/app/domain/ticket"
 )
 
 func (s *TicketsRepositoryPostgres) Save(tickets []*ticket.Ticket) error {

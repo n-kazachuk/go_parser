@@ -1,8 +1,9 @@
 package kafka_handler
 
 import (
-	"github.com/n-kazachuk/go_parser/internal/app/application/usecases"
 	"log/slog"
+
+	"github.com/n-kazachuk/go_parser/internal/app/application/usecases"
 )
 
 type KafkaHandler struct {

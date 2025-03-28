@@ -1,8 +1,9 @@
 package tickets_atlas_gateway
 
 import (
-	"github.com/n-kazachuk/go_parser/internal/app/config"
 	"log/slog"
+
+	"github.com/n-kazachuk/go_parser/internal/app/config"
 )
 
 const (

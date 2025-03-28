@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/lib/pq"
 	"github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
 	"github.com/n-kazachuk/go_parser/internal/libs/helpers"
-	"time"
 )
 
 func (s *TicketsRequestsRepositoryPostgres) Add(ticketRequest *tickets_request.TicketRequest) error {

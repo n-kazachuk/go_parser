@@ -1,16 +1,17 @@
 package tickets_atlas_gateway
 
 import (
-	ticketsRequest "github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
-
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/n-kazachuk/go_parser/internal/app/domain/ticket"
 	"github.com/n-kazachuk/go_parser/internal/libs/helpers"
-	"strconv"
-	"strings"
-	"time"
+
+	ticketsRequest "github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
 )
 
 func (s *TicketsAtlasGateway) GetTickets(ticketRequest *ticketsRequest.TicketRequest) ([]*ticket.Ticket, error) {

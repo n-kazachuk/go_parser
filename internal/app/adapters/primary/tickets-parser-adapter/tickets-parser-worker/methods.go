@@ -3,10 +3,11 @@ package tickets_parser_worker
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
 	"github.com/n-kazachuk/go_parser/internal/libs/helpers"
 	"github.com/n-kazachuk/go_parser/internal/libs/logger/sl"
-	"time"
 )
 
 func (w *Worker) Start(ctx context.Context) {

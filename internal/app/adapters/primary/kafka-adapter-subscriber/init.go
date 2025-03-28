@@ -1,13 +1,14 @@
 package kafka_adapter_subscriber
 
 import (
-	kafkaHandler "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/kafka-adapter-subscriber/kafka-handler"
+	"log/slog"
+	"strings"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/n-kazachuk/go_parser/internal/app/application/usecases"
 	"github.com/n-kazachuk/go_parser/internal/app/config"
-	"log/slog"
-	"strings"
+
+	kafkaHandler "github.com/n-kazachuk/go_parser/internal/app/adapters/primary/kafka-adapter-subscriber/kafka-handler"
 )
 
 const (

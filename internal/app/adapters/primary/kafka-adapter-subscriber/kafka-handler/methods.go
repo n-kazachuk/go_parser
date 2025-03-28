@@ -1,11 +1,12 @@
 package kafka_handler
 
 import (
-	ticketsRequest "github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
-
 	"encoding/json"
 	"fmt"
+
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+
+	ticketsRequest "github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
 )
 
 func (h *KafkaHandler) HandleTicketFindRequest(event kafka.Event) error {

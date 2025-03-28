@@ -3,11 +3,12 @@ package os_signal_adapter
 import (
 	"context"
 	"fmt"
-	"github.com/n-kazachuk/go_parser/internal/libs/helpers"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/n-kazachuk/go_parser/internal/libs/helpers"
 )
 
 type OsSignalAdapter struct {

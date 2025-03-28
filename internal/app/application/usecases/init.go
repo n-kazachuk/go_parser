@@ -17,19 +17,19 @@ type UseCases struct {
 	ticketsRequestsStorage ticketsRequestsStorage
 }
 
-type ticketsRequestsStorage interface {
-	Add(request *tickets_request.TicketRequest) error
-	GetFree(expiredInterval time.Duration) (*tickets_request.TicketRequest, error)
-	SetPicked(request *tickets_request.TicketRequest) error
-	SetProcessed(request *tickets_request.TicketRequest) error
+type ticketsGateway interface {
+	GetTickets(ticketRequest *tickets_request.TicketRequest) ([]*ticket.Ticket, error)
 }
 
 type ticketsStorage interface {
 	Save(tickets []*ticket.Ticket) error
 }
 
-type ticketsGateway interface {
-	GetTickets(ticketRequest *tickets_request.TicketRequest) ([]*ticket.Ticket, error)
+type ticketsRequestsStorage interface {
+	Add(request *tickets_request.TicketRequest) error
+	GetFree(expiredInterval time.Duration) (*tickets_request.TicketRequest, error)
+	SetPicked(request *tickets_request.TicketRequest) error
+	SetProcessed(request *tickets_request.TicketRequest) error
 }
 
 func New(
