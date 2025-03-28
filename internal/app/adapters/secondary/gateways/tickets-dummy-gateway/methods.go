@@ -1,11 +1,12 @@
 package tickets_dummy_gateway
 
 import (
-	ticketsRequest "github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
 	"math/rand"
 	"time"
 
 	"github.com/n-kazachuk/go_parser/internal/app/domain/ticket"
+
+	ticketsRequest "github.com/n-kazachuk/go_parser/internal/app/domain/tickets-request"
 )
 
 func (s *TicketsDummyGateway) GetTickets(ticketRequest *ticketsRequest.TicketRequest) ([]*ticket.Ticket, error) {
@@ -35,7 +36,9 @@ func randomTime(from, to time.Time) time.Time {
 }
 
 func normalizeTime(t time.Time) time.Time {
-	return t.Truncate(time.Minute)
+	minutes := t.Minute()
+	roundedMinutes := (minutes / 15) * 15
+	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), roundedMinutes, 0, 0, t.Location())
 }
 
 func randomPrice(min, max int) float64 {
